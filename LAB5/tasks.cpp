@@ -11,7 +11,7 @@
   std::cout << mes << " = ";                                                   \
   std::cin >> x
 
-std::vector<int> del_mxn(std::vector<int> a) {
+std::vector<int> del_mxn(std::vector<int>& a) {
 	int mini = 0, maxi = 0, min = a[0], max = a[0];
 
 	for (int i = 0; i < a.size(); i++) {
@@ -31,6 +31,16 @@ std::vector<int> del_mxn(std::vector<int> a) {
 	return a;
 }
 
+int min_detect(std::vector<std::vector<int>> a)
+{
+	int min = a[0][1];
+	for (int x = 1; x < a.size(); x++)
+		for (int y = 0; y < x; y++)
+			min = std::min(min, a[y][x]);
+	
+	return min;
+}
+
 int prod_mx(std::vector<float> a, std::vector<float> b)
 {
 	int sum = 0;
@@ -48,6 +58,34 @@ bool check_mx(std::vector<std::vector<float>> a){
 				return false;
 
 	return true;
+}
+
+int magic(std::vector<std::vector<int>>& a)
+{
+	int n = a.size();
+	int i = n / 2;
+	int j = n - 1;
+
+	for (int num = 1; num <= n*n; ) {
+		if (i == -1 && j == n) {
+			j = n - 2;
+			i = 0;
+		}
+		else {
+			if (j == n) j = 0;
+			if (i < 0) i = n - 1;
+		}
+		if (!a[i][j]) a[i][j] = num++;
+		else {
+			j -= 2;
+			i++;
+			continue;
+		}
+
+		j++;  i--;
+	}
+
+	return 1;
 }
 
 std::vector<std::vector<int>> spiral(std::vector<std::vector<int>> a)
@@ -79,15 +117,37 @@ std::vector<std::vector<int>> spiral(std::vector<std::vector<int>> a)
 	return a;
 }
 
-int det_max (std::vector<std::vector<int>> a, int row, int col)
+int sort_triag(std::vector<std::vector<int>>& a)
 {
-	int max = a[0][0];
+	int n = a.size();
+	std::vector<int> elements;
 
-	for (int y = 0; y <= row; y++)
-		for (int x = 0; x <= col; x++)
-			max = std::max(max, a[y][x]);
+	for (int row = 0; row < n; row++) for (int col = 0; col < n - row; col++)
+		elements.push_back(a[row][col]);
 
-	return max;
+	std::sort(elements.begin(), elements.end());
+
+	for (int row = 0; row < n; row++) for (int col = 0; col < n - row; col++) {
+		a[row][col] = elements[0];
+		elements.erase(elements.begin());
+	}
+
+	return 1;
+}
+
+std::vector<std::vector<int>> det_max (std::vector<std::vector<int>> a)
+{
+	std::vector<std::vector<int>> b(a.size(), std::vector<int>(a[0].size()));
+	for (int row = 0; row < a.size(); row++) for (int col = 0; col < a[0].size(); col++) {
+		int max = a[0][0];
+		for (int y = 0; y <= row; y++)
+			for (int x = 0; x <= col; x++)
+				max = std::max(max, a[y][x]);
+		b[row][col] = max;
+	}
+
+
+	return b;
 }
 
 void a1() {
@@ -99,7 +159,7 @@ void a1() {
 	for (int i = 0; i < k; i++)
 		std::cin >> arr[i];
 
-	arr = del_mxn(arr);
+	del_mxn(arr);
 	for (auto e : arr)
 		std::cout << e << " ";
 }
@@ -112,12 +172,7 @@ void a2() {
 
 	vector_in(arr);
 
-	int min = arr[0][0];
-	for (int x = 1; x < m; x++)
-		for (int y = 0; y < x; y++)
-			min = std::min(min, arr[y][x]);
-
-	std::cout << min;
+	std::cout << min_detect(arr);
 }
 
 void a3()
@@ -189,27 +244,7 @@ void i2()
 
 	std::vector<std::vector<int>> mag_square(n, std::vector<int> (n));
 
-	int i = n / 2;
-	int j = n - 1;
-
-	for (int num = 1; num <= n*n; ) {
-		if (i == -1 && j == n) {
-			j = n - 2;
-			i = 0;
-		}
-		else {
-			if (j == n) j = 0;
-			if (i < 0) i = n - 1;
-		}
-		if (!mag_square[i][j]) mag_square[i][j] = num++;
-		else {
-			j -= 2;
-			i++;
-			continue;
-		}
-
-		j++;  i--;
-	}
+	magic(mag_square);
 
 	std::cout << "Sum of each row or column : " <<  n*(n*n + 1)/2 << std::endl;
 	vector_out(mag_square);
@@ -229,19 +264,10 @@ void i4()
 	int n;
 	input(n, "N");
 
-	std::vector<int> elements;
 	std::vector<std::vector<int>> mtrx(n, std::vector<int>(n));
 	vector_in(mtrx);
 
-	for (int row = 0; row < n; row++) for (int col = 0; col < n - row; col++)
-		elements.push_back(mtrx[row][col]);
-
-	std::sort(elements.begin(), elements.end());
-
-	for (int row = 0; row < n; row++) for (int col = 0; col < n - row; col++) {
-		mtrx[row][col] = elements[0];
-		elements.erase(elements.begin());
-	}
+	sort_triag(mtrx);
 
 	vector_out(mtrx);
 }
@@ -256,8 +282,7 @@ void i5()
 
 	vector_in(mtrx);
 
-	for (int row = 0; row < n; row++) for (int col = 0; col < m; col++)
-		b[row][col] = det_max(mtrx, row, col);
+	b = det_max(mtrx);
 
 	vector_out(b);
 }
